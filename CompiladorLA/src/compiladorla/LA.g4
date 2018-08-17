@@ -12,7 +12,7 @@ decl_local_global	:	declaracao_local | declaracao_global;
 declaracao_local	:	'declare' variavel
  						| 'constante' IDENT ':' tipo_basico '=' valor_constante
  						| 'tipo' IDENT	':' tipo ;
-variavel			:	identificador ('.' identificador)+ ':' tipo ;
+variavel			:	identificador (',' identificador)+ ':' tipo ;
 identificador		:	IDENT ('.' IDENT)+ dimensao ;
 dimensao			:	('[' exp_aritmetica ']')+ ;	
 tipo 				:	registro | tipo_estendido ;
@@ -70,9 +70,8 @@ op_logico_2			:	'e' ;
 
 
 IDENT				:	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+ ;
-Cadeia 				:	('"')(('a'..'z') | ('A'..'Z') | ('0'..'9'))+ ('"');
+Cadeia 				:	('"') (('a'..'z') | ('A'..'Z') | ('0'..'9'))+ ('"');
 Num_Int 			:	('0'..'9')+ ;
 Num_Real 			: 	('0'..'9')+ ('.' ('0'..'9')+)* ;
-Comentario 			: 	'{' ' ' ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
-						 ('\n' | ' ')* '}' {skip();};
+Comentario 			: 	'{' ~('}')* '}' {skip();};
 WS 					: 	(' ' | '\t' | '\r' | '\n') {skip();};

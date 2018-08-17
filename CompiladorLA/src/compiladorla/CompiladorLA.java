@@ -17,8 +17,12 @@ public class CompiladorLA {
      public static void main(String args[]) throws IOException, RecognitionException {
          
         SaidaParser out = new SaidaParser();
+        //Selecione o caso de teste
+        String caso = "1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt";
         
-        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("/home/kananishi/Downloads/alg.txt"));//("test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/entrada/1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10"));
+        // Coloque aqui o caminho para os arquivos de teste
+        // Caminho para pasta onde salvou o arquivo + CompiladorLA/test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/entrada/
+        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/entrada/" + caso));
         
         LALexer lexer = new LALexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
