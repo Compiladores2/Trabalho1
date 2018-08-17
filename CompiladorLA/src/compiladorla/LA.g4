@@ -1,5 +1,5 @@
 lexer grammar LA;
-
+//
 /*
  *@members {
  *  public static String grupo="<628298>,<628042>";
