@@ -1,5 +1,5 @@
-lexer grammar LA;
-//
+grammar LA;
+
 /*
  *@members {
  *  public static String grupo="<628298>,<628042>";
@@ -21,9 +21,9 @@ tipo_basico_ident	:	tipo_basico | IDENT ;
 tipo_estendido		:	('^')* tipo_basico_ident ;
 valor_constante		:	Cadeia | Num_Int | Num_Real | 'verdadeiro' | 'falso' ;
 registro			:	'registro' (variavel)+ 'fim_registro' ;
-declaracao_global	:	'procedimento' IDENT '(' (parametros)* ')' (declaracao_local)+ (cmd)* ;
-						'fim procedimento'
-						| 'funcao' IDENT '(' (parametros)*	')' ':' tipo_estendido (declaracao_local)
+declaracao_global	:	'procedimento' IDENT '(' (parametros)* ')' (declaracao_local)+ (cmd)*
+						'fim_procedimento'
+						| 'funcao' IDENT '(' (parametros)*	')' ':' tipo_estendido (declaracao_local)+
 						(cmd)+ 'fim_funcao' ;
 parametro			:	('var')* identificador (',' identificador)+ ':' tipo_estendido ;
 parametros			: 	parametro (',' parametro)+ ;
@@ -32,8 +32,8 @@ cmd					:	cmdLeia | cmdEscreva | cmdSe | cmdCaso | cmdPara | cmdEnquanto
 						| cmdFaca | cmdAtribuicao | cmdChamada | cmdRetorne ;
 cmdLeia				:	'leia' '(' ('^')* identificador (',' ('^')* identificador)+ ')' ;
 cmdEscreva			:	'escreva' '(' expressao (',' ('^')* identificador)+ ')' ;
-cmdSe 				:	'se' expressao 'entao' (cmd)+ ('senao' (cmd+)* 'fim_se' ;
-cmdCaso 			:	'caso' exp_aritmetica 'seja' selecao ('senao' cmd+) 'fim_caso' ;
+cmdSe 				:	'se' expressao 'entao' (cmd)+ ('senao' (cmd+))* 'fim_se' ;
+cmdCaso 			:	'caso' exp_aritmetica 'seja' selecao ('senao' cmd+)* 'fim_caso' ;
 cmdPara				:	'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' (cmd)+ 'fim_para' ;
 cmdEnquanto			:	'enquanto' expressao 'faca' (cmd)+ 'fim_enquanto' ;
 cmdFaca 			: 	'faca' (cmd)+ 'ate' expressao ;
@@ -41,7 +41,7 @@ cmdAtribuicao		:	('^')* identificador '<-' expressao ;
 cmdChamada			:	IDENT '(' expressao (',' expressao)+ ')';
 cmdRetorne			:	'retorne' expressao ;
 selecao				: 	(item_selecao)+;
-item_selecao		:	constantes ':' (cmd)+ ;
+item_selecao		:	constantes ':' cmd+ ;
 constantes			:	numero_intervalo (',' numero_intervalo)+;
 numero_intervalo	:	(op_unario)* Num_Int ('..' (op_unario)* Num_Int)* ;
 op_unario			:	'-' ;
@@ -68,9 +68,11 @@ parcela_logica		:	('verdadeiro' | 'falso')
 op_logico_1			: 	'ou' ;
 op_logico_2			:	'e' ;
 
+
 IDENT				:	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+ ;
-Cadeia 				:	('\"')(('a'..'z') | ('A'..'Z') | ('0'..'9'))+ ('\"');
+Cadeia 				:	('"')(('a'..'z') | ('A'..'Z') | ('0'..'9'))+ ('"');
 Num_Int 			:	('0'..'9')+ ;
-Num_Real 			: 	('0'..'9')+ ('.' ('0'..'9'))+)* ;
-Comentario : '{' Cadeia ('\n')* '}' {skip();};
-WS : (' ' | '\t' | '\r' | '\n'){skip();};
+Num_Real 			: 	('0'..'9')+ ('.' ('0'..'9')+)* ;
+Comentario 			: 	'{' ' ' ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+						 ('\n' | ' ')* '}' {skip();};
+WS 					: 	(' ' | '\t' | '\r' | '\n') {skip();};
