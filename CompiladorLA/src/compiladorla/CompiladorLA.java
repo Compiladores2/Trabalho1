@@ -31,8 +31,8 @@ public class CompiladorLA {
         parser.programa();
         
         if (!out.isModificado()) {
-            out.println("Fim da analise. Sem erros sintaticos.");
-            out.println("Tabela de simbolos:");
+            System.out.println("Fim da analise. Sem erros sintaticos.");
+            System.out.println("Tabela de simbolos:");
 
             TabelaDeSimbolos.imprimirTabela(out);
             System.out.print(out);
