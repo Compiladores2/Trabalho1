@@ -21,9 +21,9 @@ tipo_basico_ident	:	tipo_basico | IDENT ;
 tipo_estendido		:	('^')? tipo_basico_ident ;
 valor_constante		:	Cadeia | Num_Int | Num_Real | 'verdadeiro' | 'falso' ;
 registro			:	'registro' (variavel)* 'fim_registro' ;
-declaracao_global	:	'procedimento' IDENT '(' (parametros)* ')' (declaracao_local)+ (cmd)*
+declaracao_global	:	'procedimento' IDENT '(' (parametros)* ')' (declaracao_local)* (cmd)*
 						'fim_procedimento'
-						| 'funcao' IDENT '(' (parametros)*	')' ':' tipo_estendido (declaracao_local)+
+						| 'funcao' IDENT '(' (parametros)*	')' ':' tipo_estendido (declaracao_local)*
 						(cmd)* 'fim_funcao' ;
 parametro			:	('var')? identificador (',' identificador)* ':' tipo_estendido ;
 parametros			: 	parametro (',' parametro)* ;
@@ -69,7 +69,7 @@ op_logico_1			: 	'ou' ;
 op_logico_2			:	'e' ;
 
 
-IDENT				:	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+ ;
+IDENT				:	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')* ;
 Cadeia 				:	'"' ~('"')* '"';
 Num_Int 			:	('0'..'9')+ ;
 Num_Real 			: 	('0'..'9')+ '.' ('0'..'9')+ ;

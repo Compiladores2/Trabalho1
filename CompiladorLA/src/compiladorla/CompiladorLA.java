@@ -1,5 +1,6 @@
 package compiladorla;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,30 +17,37 @@ public class CompiladorLA {
 
      public static void main(String args[]) throws IOException, RecognitionException {
          
-        SaidaParser out = new SaidaParser();
-        //Selecione o caso de teste
-        String caso = "1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt";
+        //Seleção do caso de Teste
+        String CAMINHO_CASOS_TESTE = "/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/3.arquivos_sem_erros/";
+        File diretorioCasosTeste = new File(CAMINHO_CASOS_TESTE + "/1.entrada");
+        String caso = "18.procedimento_impressao.alg";
+        File[] casosTeste = diretorioCasosTeste.listFiles();
+        int totalCasosTeste = casosTeste.length;
+        int casosTesteErrados = 0;
         
-        // Coloque aqui o caminho para os arquivos de teste
-        // Caminho para pasta onde salvou o arquivo + CompiladorLA/test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/entrada/
-        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/entrada/" + caso));
-        
-        LALexer lexer = new LALexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        LAParser parser = new LAParser(tokens);
-        parser.addErrorListener(new T1ErrorListener(out));
-        parser.programa();
-        
-        if (!out.isModificado()) {
-            System.out.println("Fim da analise. Sem erros sintaticos.");
-            System.out.println("Tabela de simbolos:");
+        //String casoTeste = CAMINHO_CASOS_TESTE + "1.entrada/" + caso;{
+        for (File casoTeste : casosTeste){
+            SaidaParser out = new SaidaParser();
+            ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(casoTeste));
+            TabelaDeSimbolos.limparTabela();
+            LALexer lexer = new LALexer(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            LAParser parser = new LAParser(tokens);
+            
+            parser.addErrorListener(new T1ErrorListener(out));
+            parser.programa();
 
-            TabelaDeSimbolos.imprimirTabela(out);
-            System.out.print(out);
-        } else {
-            System.out.println("Fim da analise. Com erros sintaticos.");
+            if (!out.isModificado()) {
+                System.out.println("Fim da analise. Sem erros sintaticos.");
+                System.out.println("Tabela de simbolos:");
+
+                TabelaDeSimbolos.imprimirTabela(out);
+                System.out.print(out);
+            } else {
+                System.out.println("Fim da analise. Com erros sintaticos.");
+                casosTesteErrados++;
+            }
         }
-        
-        
-    }
+        System.out.println("Casos de teste errados: " + casosTesteErrados);
+    }// end main
 }
