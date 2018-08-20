@@ -17,6 +17,9 @@ public class CompiladorLA {
 
      public static void main(String args[]) throws IOException, RecognitionException {
          
+        //File fin = new File(args[0]);
+        //File fout = new File(args[1]); 
+          
         //Seleção do caso de Teste
         String CAMINHO_CASOS_TESTE = "/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/3.arquivos_sem_erros/";
         File diretorioCasosTeste = new File(CAMINHO_CASOS_TESTE + "/1.entrada");
@@ -35,7 +38,11 @@ public class CompiladorLA {
             LAParser parser = new LAParser(tokens);
             
             parser.addErrorListener(new T1ErrorListener(out));
-            parser.programa();
+            try {
+               parser.programa();
+            } catch(ParseCancellationException pce) {
+                out.println(pce.getMessage());
+            }
 
             if (!out.isModificado()) {
                 System.out.println("Fim da analise. Sem erros sintaticos.");
