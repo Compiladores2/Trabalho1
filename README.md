@@ -12,3 +12,6 @@
 
 #### Como gerar a gramática usando o antlr 4.7.1?
     java -jar antlr-4.7.1-complete.jar -package compiladorla LA.g4
+
+#### Como usar o Corretor Automático?
+	java -jar CorretorTrabalho1.jar "java -jar compilador/CompiladorLA.jar" gcc temp/ casosDeTesteT1/ "RA" sintatico

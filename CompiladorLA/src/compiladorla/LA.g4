@@ -18,6 +18,7 @@ decl_local_global	:	declaracao_local | declaracao_global;
 declaracao_local	:	'declare' variavel
  				| 'constante' IDENT ':' tipo_basico '=' valor_constante
  				| 'tipo' IDENT	':' tipo ;
+ 				
 variavel		:	identificador (',' identificador)* ':' tipo ;
 identificador		:	IDENT ('.' IDENT)* dimensao ;
 dimensao		:	('[' exp_aritmetica ']')* ;	
@@ -31,11 +32,13 @@ declaracao_global	:	'procedimento' IDENT '(' (parametros)* ')' (declaracao_local
 				'fim_procedimento'
 				| 'funcao' IDENT '(' (parametros)*	')' ':' tipo_estendido (declaracao_local)*
 				(cmd)* 'fim_funcao' ;
+
 parametro		:	('var')? identificador (',' identificador)* ':' tipo_estendido ;
 parametros		: 	parametro (',' parametro)* ;
 corpo			:	(declaracao_local)* (cmd)* ;
 cmd			:	cmdLeia | cmdEscreva | cmdSe | cmdCaso | cmdPara | cmdEnquanto 
 				| cmdFaca | cmdAtribuicao | cmdChamada | cmdRetorne ;
+
 cmdLeia			:	'leia' '(' ('^')? identificador (',' ('^')? identificador)* ')' ;
 cmdEscreva		:	'escreva' '(' expressao (',' expressao)* ')' ;
 cmdSe 			:	'se' expressao 'entao' (cmd)* ('senao' (cmd)*)? 'fim_se' ;
@@ -70,15 +73,16 @@ expressao			:	termo_logico (op_logico_1 termo_logico)* ;
 termo_logico		: 	fator_logico (op_logico_2 fator_logico)* ;
 fator_logico		:	('nao')? parcela_logica ;
 parcela_logica		:	('verdadeiro' | 'falso')
-						| exp_relacional;
+				| exp_relacional;
 op_logico_1		: 	'ou' ;
 op_logico_2		:	'e' ;
 
 
-IDENT			:	( 'a'..'z' | 'A'..'Z' | '_')+ ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')* ;
+IDENT			:	('a'..'z' | 'A'..'Z' | '_')+ ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')* ;
 Cadeia 			:	'"' ~('"')* '"';
 Num_Int 		:	('0'..'9')+ ;
 Num_Real 		: 	('0'..'9')+ '.' ('0'..'9')+ ;
+Erro_Comen_S_Fecha	:	'{' ~('}' | '\n')* ('\n') {erroLexico("Linha "+getLine()+": "+"comentario nao fechado");};
 Comentario 		: 	'{' ~('}')* '}' {skip();};
 WS 			: 	(' ' | '\t' | '\r' | '\n') {skip();};
-ERRO                    : . { erroLexico("Linha "+getLine()+": "+getText()+" - simbolo nao identificado"); };
+ERRO                    :       . { erroLexico("Linha "+getLine()+": "+getText()+" - simbolo nao identificado"); };
