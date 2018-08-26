@@ -25,4 +25,4 @@ Adicionar permissão de execução ao script
 
 Executar o script com uma das opções de correção (sintatico, semantico, gerador ou tudo)
 
-	./script.sh opcao_de_correcao
+	./corretor.sh opcao_de_correcao
