@@ -21,7 +21,10 @@ public class T1ErrorListener implements ANTLRErrorListener {
     public void syntaxError(Recognizer<?, ?> rcgnzr, Object o, int i, int i1, String string, RecognitionException re) {
         if (!sp.isModificado()) {
             Token t = (Token)o;
-            sp.println("Linha " + i + ": erro sintatico proximo a " + t.getText());
+            if(t.getText() == "<EOF>")
+                sp.println("Linha " + i + ": erro sintatico proximo a " + "EOF");
+            else
+                sp.println("Linha " + i + ": erro sintatico proximo a " + t.getText());
         }
     }
 

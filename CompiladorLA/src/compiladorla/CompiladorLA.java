@@ -1,5 +1,6 @@
 package compiladorla;
 
+import compiladorla.LAParser.ProgramaContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,33 +27,33 @@ public class CompiladorLA {
         PrintWriter pw = new PrintWriter(new FileWriter(fout));
         /*
          //Seleção do caso de Teste
-        String CAMINHO_CASOS_TESTE = "/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/1.arquivos_com_erros_sintaticos/";
-        String caso = "1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt";
-        String fin = CAMINHO_CASOS_TESTE + "entrada/" + caso;
+        String CAMINHO_CASOS_TESTE = "/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/";
+        String tipo = "2.arquivos_com_erros_semanticos/";
+        String caso = "1.algoritmo_2-2_apostila_LA.txt";
+        String fin = CAMINHO_CASOS_TESTE + tipo + "entrada/" + caso;
         */
         
         SaidaParser out = new SaidaParser();
         ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(fin));
-        TabelaDeSimbolos.limparTabela();
         LALexer lexer = new LALexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         LAParser parser = new LAParser(tokens);
-           
         parser.addErrorListener(new T1ErrorListener(out));
+        
         try {
-            parser.programa();
+            ProgramaContext arvore = parser.programa();
+            //AnalisadorSemantico as = new AnalisadorSemantico(out);
+            //as.visitPrograma(arvore);
         } catch(ParseCancellationException pce) {
             out.println(pce.getMessage());
         }
 
         if (!out.isModificado()) {
-            //System.out.println("Fim da analise. Sem erros sintaticos.");
-            //System.out.println("Tabela de simbolos:");
-            //TabelaDeSimbolos.imprimirTabela(out);
-            //System.out.println("Fim da Analise\n" + out);
-            pw.print(out);
+            // Fim da analise. Sem erros sintaticos
+            //System.out.println(out);
+            //pw.print(out);
         } else {
-            //System.out.println("Fim da analise. Com erros sintaticos.");
+            //Fim da analise. Com erros sintaticos
             //System.out.println(out);
             pw.println(out);
             pw.println("Fim da compilacao");
