@@ -18,20 +18,13 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
  * @author 
  */
 public class CompiladorLA {
-    
 
      public static void main(String args[]) throws IOException, RecognitionException {
         
+// Arquivos de Entrada e Saida passados como parametros
         File fin = new File(args[0]);
         File fout = new File(args[1]); 
         PrintWriter pw = new PrintWriter(new FileWriter(fout));
-        /*
-         //Seleção do caso de Teste
-        String CAMINHO_CASOS_TESTE = "/home/kananishi/Documents/UFSCar/CC2/Trabalho1/Trabalho1/CompiladorLA/test/casosDeTesteT1/";
-        String tipo = "2.arquivos_com_erros_semanticos/";
-        String caso = "1.algoritmo_2-2_apostila_LA.txt";
-        String fin = CAMINHO_CASOS_TESTE + tipo + "entrada/" + caso;
-        */
         
         SaidaParser out = new SaidaParser();
         ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(fin));
@@ -41,21 +34,25 @@ public class CompiladorLA {
         parser.addErrorListener(new T1ErrorListener(out));
         
         try {
-            ProgramaContext arvore = parser.programa();
-            //AnalisadorSemantico as = new AnalisadorSemantico(out);
-            //as.visitPrograma(arvore);
+            ProgramaContext arvore = parser.programa();   
+            
+            // Nao houve erros sintaticos
+            if(!out.isModificado()){
+                AnalisadorSemantico as = new AnalisadorSemantico(out);
+                as.visitPrograma(arvore);
+            }
         } catch(ParseCancellationException pce) {
             out.println(pce.getMessage());
         }
 
+        // Não houve erros ao compilar o programa
         if (!out.isModificado()) {
-            // Fim da analise. Sem erros sintaticos
-            //System.out.println(out);
-            //pw.print(out);
-        } else {
-            //Fim da analise. Com erros sintaticos
-            //System.out.println(out);
-            pw.println(out);
+            pw.print("Sem erros");
+        } 
+        
+        else {
+            // Mostra no arquivo de saida os erros na compilacao do programa
+            pw.print(out);
             pw.println("Fim da compilacao");
             
         }

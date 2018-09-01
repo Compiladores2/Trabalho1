@@ -7,6 +7,10 @@ grammar LA;
  */
 
 @lexer::members {
+	/* Mensagem de erro léxico
+	 * Possíveis erros: Comentario sem fechar e nomes de variáveis 
+	 * comecando com caracteres invalidos.
+	 */	
 	void erroLexico(String msg) {
 		throw new ParseCancellationException(msg);
 	}

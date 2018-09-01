@@ -59,12 +59,8 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             visitVariavel(ctx.variavel());
         }
         else if(ctx.IDENT() != null){
-            TabelaDeSimbolos ts = pilha.topo();
-            if(!ts.existeSimbolo(ctx.IDENT().getText())){
-                visitTipo_basico(ctx.tipo_basico());
-                visitValor_constante(ctx.valor_constante());
-                ts.adicionarSimbolo(ctx.getText(), "Constante");
-                
+            if(ctx.tipo() != null){
+                visitTipo(ctx.tipo());
             }
         }
         
@@ -76,21 +72,74 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         TabelaDeSimbolos escopoAtual = pilha.topo();
         for(LAParser.IdentificadorContext id:ctx.identificador()){
             if(escopoAtual.existeSimbolo(id.getText())){
-                sp.println("Linha " + ": identificador " + id.getText() + " ja declarado anteriormente");
+                sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + id.getText() + " ja declarado anteriormente");
             }
-            else{ // Inserir variavel na tabela de simbolos
+            // Variavel não declarada
+            else{ 
+                // Inserir variavel na tabela de simbolos
                 escopoAtual.adicionarSimbolo(id.getText(), ctx.tipo().getText() );
             }
+        }
+        
+        if(ctx.tipo() != null){
+            visitTipo(ctx.tipo());
         }
         return null;
     }
     
     @Override
-    public Void visitTipo_basico_ident(LAParser.Tipo_basico_identContext ctx) {
+    public Void visitTipo(LAParser.TipoContext ctx) {
+        if(ctx.registro() != null)
+            visitRegistro(ctx.registro());
+        else if (ctx.tipo_estendido() != null)
+            visitTipo_estendido(ctx.tipo_estendido());
         
         return null;
     }
 
+    @Override
+    public Void visitRegistro(LAParser.RegistroContext ctx) {
+        TabelaDeSimbolos escopoAtual = pilha.topo();
+        escopoAtual.adicionarSimbolo(ctx.parent.parent.getText(), "registro");
+        for(LAParser.VariavelContext var: ctx.variavel()){
+            visitVariavel(var);
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
+        visitTipo_basico_ident(ctx.tipo_basico_ident());
+        return null;
+    }
+
+    @Override
+    public Void visitTipo_basico_ident(LAParser.Tipo_basico_identContext ctx) {
+        if(ctx.tipo_basico() != null)
+            visitTipo_basico(ctx.tipo_basico());
+        else if(ctx.IDENT() != null){
+            TabelaDeSimbolos ts = pilha.topo();
+            if(!ts.existeSimbolo(ctx.getText())){
+                sp.println("Linha " +  ctx.getStart().getLine() + ": tipo " + ctx.getText() + " nao declarado");
+            }
+        }
+            
+        return null;
+    }
+    
+    @Override
+    public Void visitTipo_basico(LAParser.Tipo_basicoContext ctx) {
+        String tipo = ctx.getText();
+        // Verificar se o tipo existe
+        if(ctx.getText().equals("literal") | ctx.getText().equals("inteiro") | ctx.getText().equals("real") | ctx.getText().equals("logico")){
+            return null;
+        }
+            
+        else{
+            sp.println("Linha " + ctx.getStart().getLine()+ ": tipo " + ctx.getText() + " nao declarado");
+        }
+        return null;
+    }
     
     
     @Override
@@ -133,35 +182,142 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         return null;
     }
+    
+    @Override
+    public Void visitCmdLeia(LAParser.CmdLeiaContext ctx) {
+        TabelaDeSimbolos escopoAtual = pilha.topo();
+        for(LAParser.IdentificadorContext id:ctx.identificador()){
+            if(!escopoAtual.existeSimbolo(id.getText())){
+                sp.println("Linha " + id.getStart().getLine() + ": identificador " + id.getText() + " nao declarado");
+            }
+        }
+        
+        return null;
+    }
 
     @Override
-    public Void visitCmdEscreva(LAParser.CmdEscrevaContext ctx) {
+    public Void visitCmdEscreva(LAParser.CmdEscrevaContext ctx) { 
         for(LAParser.ExpressaoContext exp:ctx.expressao()){
             visitExpressao(exp);
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitExpressao(LAParser.ExpressaoContext ctx) {
+        for(LAParser.Termo_logicoContext termo:ctx.termo_logico()){
+            visitTermo_logico(termo);
+        }
+        return null;
+    }
+    
+     @Override
+    public Void visitTermo_logico(LAParser.Termo_logicoContext ctx) {
+        for(LAParser.Fator_logicoContext fator: ctx.fator_logico()){
+            visitFator_logico(fator);
+        }
+        return null;
+    }
+    
+    @Override
+    public Void visitFator_logico(LAParser.Fator_logicoContext ctx) {
+        visitParcela_logica(ctx.parcela_logica());
+        return null;
+    }
+   
+    @Override
+    public Void visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
+        if(ctx.exp_relacional() != null){
+            visitExp_relacional(ctx.exp_relacional());
+        }
+        
+        return null;
+    }   
+    
+    @Override
+    public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
+        for(LAParser.Exp_aritmeticaContext expA: ctx.exp_aritmetica()){
+            visitExp_aritmetica(expA);
         }
         
         return null;
     }
     
     @Override
-    public Void visitExpressao(LAParser.ExpressaoContext ctx) {
-        return super.visitExpressao(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    @Override
-    public Void visitTipo_basico(LAParser.Tipo_basicoContext ctx) {
-        // Verificar se o tipo existe
-        if(ctx.getText() != "literal" | ctx.getText() != "inteiro" | ctx.getText() != "real" | ctx.getText() != "logico"){
-            sp.println("Linha " + ctx.getText() + " tipo nao declarado");
+    public Void visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
+        for(LAParser.TermoContext termo: ctx.termo()){
+            visitTermo(termo);
         }
+        
         return null;
     }
     
     @Override
-    public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
-        return super.visitIdentificador(ctx); //To change body of generated methods, choose Tools | Templates.
+    public Void visitTermo(LAParser.TermoContext ctx) {
+        for(LAParser.FatorContext fator:ctx.fator()){
+            visitFator(fator);
+        }
+        
+        return null;
     }
     
+    @Override
+    public Void visitFator(LAParser.FatorContext ctx) {
+        for(LAParser.ParcelaContext parc: ctx.parcela()){
+            visitParcela(parc);
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Void visitParcela(LAParser.ParcelaContext ctx) {
+    
+        if(ctx.parcela_unario() != null){
+            visitParcela_unario(ctx.parcela_unario());
+        }
+        
+        else if(ctx.parcela_nao_unario() != null){
+            visitParcela_nao_unario(ctx.parcela_nao_unario());
+        }        
+        return null;
+    }
+
+    @Override
+    public Void visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
+        return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Void visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        if(ctx.identificador() != null){
+            TabelaDeSimbolos escopoAtual = pilha.topo();
+            if(!escopoAtual.existeSimbolo(ctx.identificador().getText())){
+                sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.identificador().getText() + " nao declarado");
+            }
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Void visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
+        if(ctx.identificador() != null){
+            TabelaDeSimbolos escopoAtual = pilha.topo();
+            if(!escopoAtual.existeSimbolo(ctx.identificador().getText())){
+                sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.identificador().getText() + " nao declarado");
+            }
+            //Verificar tipo
+            else{
+                
+            }
+        }
+        
+        return null;
+    }
+    
+    
+    //--------------------------------------------------------------------------------------------------------------------------------------------
     
     @Override
     public Void visitOp_logico_2(LAParser.Op_logico_2Context ctx) {
@@ -173,47 +329,20 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitOp_logico_1(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
-        return super.visitParcela_logica(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitFator_logico(LAParser.Fator_logicoContext ctx) {
-        return super.visitFator_logico(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitTermo_logico(LAParser.Termo_logicoContext ctx) {
-        return super.visitTermo_logico(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
     
-
-    @Override
+@Override
+    public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
+        return null;
+    }
+        @Override
     public Void visitOp_relacional(LAParser.Op_relacionalContext ctx) {
         return super.visitOp_relacional(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
-        return super.visitExp_relacional(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
+    
+    
 
-    @Override
-    public Void visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
-        return super.visitParcela_nao_unario(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
-        return super.visitParcela_unario(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitParcela(LAParser.ParcelaContext ctx) {
-        return super.visitParcela(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public Void visitOp3(LAParser.Op3Context ctx) {
@@ -230,20 +359,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitOp1(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitFator(LAParser.FatorContext ctx) {
-        return super.visitFator(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitTermo(LAParser.TermoContext ctx) {
-        return super.visitTermo(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
-        return super.visitExp_aritmetica(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public Void visitOp_unario(LAParser.Op_unarioContext ctx) {
@@ -280,10 +396,6 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitCmdChamada(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
-        return super.visitCmdAtribuicao(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public Void visitCmdFaca(LAParser.CmdFacaContext ctx) {
@@ -315,10 +427,6 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitCmdSe(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitCmdLeia(LAParser.CmdLeiaContext ctx) {
-        return super.visitCmdLeia(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
     
 
     @Override
@@ -336,26 +444,13 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitDeclaracao_global(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitRegistro(LAParser.RegistroContext ctx) {
-        return super.visitRegistro(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public Void visitValor_constante(LAParser.Valor_constanteContext ctx) {
         return super.visitValor_constante(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
-        return super.visitTipo_estendido(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Void visitTipo(LAParser.TipoContext ctx) {
-        return super.visitTipo(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
     @Override
     public Void visitDimensao(LAParser.DimensaoContext ctx) {
         return super.visitDimensao(ctx); //To change body of generated methods, choose Tools | Templates.

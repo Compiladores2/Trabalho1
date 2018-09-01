@@ -1,0 +1,5 @@
+Linha 65: tipo tVinho nao declarado
+Linha 74: identificador vinho[i] nao declarado
+Linha 86: identificador vinho[i] nao declarado
+Linha 94: identificador vinho[i] nao declarado
+Fim da compilacao
