@@ -39,6 +39,16 @@ public class TabelaDeSimbolos {
         return false;
     }
     
+    public String getTipo(String nome){
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            if(etds.getNome().equals(nome)) {
+                return etds.getTipo();
+            }
+            
+        }
+        return "";
+    }
+    
     @Override
     public String toString() {
         String ret = "Escopo: "+escopo;

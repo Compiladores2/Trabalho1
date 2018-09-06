@@ -2,9 +2,9 @@ package compiladorla;
 
 import java.util.List;
 
-/*
+/* Rodando: 1,2,3,5,18
     1 - identificador ja declarado anteriormente
-    2 - tipo nao declarado
+    2 - tipo nao declarado v
     3 - identificador nao declarado
     4 - incompatibilidade de argumentos(num, ordem e tipo) na chamada de funcoes/proc
     5 - atribuicao n compativel com o tipo declarado
@@ -46,7 +46,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         if(ctx.declaracao_local() != null){
             visitDeclaracao_local(ctx.declaracao_local());
         } else if(ctx.declaracao_global() != null){
-            //return visitDeclaracao_global(ctx.declaracao_global());
+            return visitDeclaracao_global(ctx.declaracao_global());
         }
         return null;
     }
@@ -58,7 +58,16 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             //TabelaDeSimbolos ts = pilha.topo();
             visitVariavel(ctx.variavel());
         }
+        
+        // Definicao de tipo
         else if(ctx.IDENT() != null){
+            TabelaDeSimbolos escopoAtual = pilha.topo();
+            if(escopoAtual.existeSimbolo(ctx.IDENT().getText())){
+                sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().getText() + " ja declarado anteriormente");
+            }
+            else{
+                escopoAtual.adicionarSimbolo(ctx.IDENT().getText(), "tipo");
+            }
             if(ctx.tipo() != null){
                 visitTipo(ctx.tipo());
             }
@@ -66,24 +75,38 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         return null;    
     }
+    
+    @Override
+    public Void visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        
+        if(ctx.IDENT() != null){
+            //pilha.empilhar(new TabelaDeSimbolos("Funcao"));
+        }
+        
+        return null;
+    }
+
 
     @Override
     public Void visitVariavel(LAParser.VariavelContext ctx) { 
-        TabelaDeSimbolos escopoAtual = pilha.topo();
+        
         for(LAParser.IdentificadorContext id:ctx.identificador()){
+            TabelaDeSimbolos escopoAtual = pilha.topo();
             if(escopoAtual.existeSimbolo(id.getText())){
-                sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + id.getText() + " ja declarado anteriormente");
+                sp.println("Linha " + id.getStart().getLine() + ": identificador " + id.getText() + " ja declarado anteriormente");
             }
-            // Variavel não declarada
-            else{ 
-                // Inserir variavel na tabela de simbolos
+
+            else{ // Variavel nao declarada
+                // Verificar se o tipo é valido antes de inserir na tabela
+                if(ctx.tipo() != null){
+                    visitTipo(ctx.tipo());
+                }
                 escopoAtual.adicionarSimbolo(id.getText(), ctx.tipo().getText() );
-            }
+            }  
+            
         }
         
-        if(ctx.tipo() != null){
-            visitTipo(ctx.tipo());
-        }
+        
         return null;
     }
     
@@ -99,8 +122,6 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitRegistro(LAParser.RegistroContext ctx) {
-        TabelaDeSimbolos escopoAtual = pilha.topo();
-        escopoAtual.adicionarSimbolo(ctx.parent.parent.getText(), "registro");
         for(LAParser.VariavelContext var: ctx.variavel()){
             visitVariavel(var);
         }
@@ -109,7 +130,19 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
     
     @Override
     public Void visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
-        visitTipo_basico_ident(ctx.tipo_basico_ident());
+        
+        if(ctx.tipo_basico_ident() != null)
+            visitTipo_basico_ident(ctx.tipo_basico_ident());
+        
+        /*else{
+            TabelaDeSimbolos escopoAtual = pilha.topo();
+            if(escopoAtual.existeSimbolo(ctx.getText())){
+                return null;
+            }
+            else{   // Tipo não declarado
+                sp.println("Linha " + ctx.getStart().getLine() + ": tipo " + ctx.getText() + " nao declarado");
+            }
+        }*/
         return null;
     }
 
@@ -299,7 +332,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         return null;
     }
-
+    /*
     @Override
     public Void visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
         if(ctx.identificador() != null){
@@ -309,15 +342,55 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             }
             //Verificar tipo
             else{
+                String idTipo = escopoAtual.getTipo(ctx.identificador().getText());   //Tipo do identificador
+                List<String> expTipo = null;
                 
-            }
+                // Definir tipo da expressão
+                if(ctx.expressao() != null){
+                    //Descer camadas até chegar no identificador
+                    for(LAParser.Termo_logicoContext tl:ctx.expressao().termo_logico()){
+                        for(LAParser.Fator_logicoContext fl:tl.fator_logico()){
+                            for(LAParser.Exp_aritmeticaContext expA:fl.parcela_logica().exp_relacional().exp_aritmetica()){
+                                for(LAParser.TermoContext t:expA.termo()){
+                                    for(LAParser.FatorContext f:t.fator()){
+                                        for(LAParser.ParcelaContext p:f.parcela()){
+                                            if(p.parcela_unario() != null){
+                                                if(p.parcela_unario().identificador() != null)
+                                                    if(escopoAtual.existeSimbolo(p.getText())){
+                                                        expTipo.add(escopoAtual.getTipo(p.parcela_unario().identificador().getText()));
+                                                    }
+                                            }
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                                    
+                            
+                        }
+                        // Verificacao se os tipo sao iguais
+                        
+                        
+                    } // For inicial da descida de camadas
+                    sp.println(expTipo.get(0));
+                }// End if - determinar tipo da expressao
+                
+                if(!idTipo.equals(expTipo))
+                    sp.println("Linha " + ctx.getStart().getLine() + ": Atribuição nao compativel para " + ctx.identificador().getText());
+                
+            } //End else - Verifica tipo da expressao
         }
         
         return null;
     }
-    
+    */
     
     //--------------------------------------------------------------------------------------------------------------------------------------------
+    @Override
+    public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
+        
+        return null;
+    }
     
     @Override
     public Void visitOp_logico_2(LAParser.Op_logico_2Context ctx) {
@@ -329,12 +402,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitOp_logico_1(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
-@Override
-    public Void visitIdentificador(LAParser.IdentificadorContext ctx) {
-        return null;
-    }
-        @Override
+    @Override
     public Void visitOp_relacional(LAParser.Op_relacionalContext ctx) {
         return super.visitOp_relacional(ctx); //To change body of generated methods, choose Tools | Templates.
     }
@@ -439,11 +507,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitParametro(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public Void visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-        return super.visitDeclaracao_global(ctx); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
 
     @Override
     public Void visitValor_constante(LAParser.Valor_constanteContext ctx) {
