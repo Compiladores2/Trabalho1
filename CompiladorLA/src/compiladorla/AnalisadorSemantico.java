@@ -2,7 +2,7 @@ package compiladorla;
 
 import java.util.List;
 
-/* Rodando: 1,2,3,5,18
+/* Rodando: 1,2,3,4,5,6,9,18
     1 - identificador ja declarado anteriormente
     2 - tipo nao declarado v
     3 - identificador nao declarado
@@ -134,7 +134,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         if(ctx.tipo_basico_ident() != null)
             visitTipo_basico_ident(ctx.tipo_basico_ident());
         
-        /*else{
+        else{
             TabelaDeSimbolos escopoAtual = pilha.topo();
             if(escopoAtual.existeSimbolo(ctx.getText())){
                 return null;
@@ -142,14 +142,15 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             else{   // Tipo não declarado
                 sp.println("Linha " + ctx.getStart().getLine() + ": tipo " + ctx.getText() + " nao declarado");
             }
-        }*/
+        }
         return null;
     }
 
     @Override
     public Void visitTipo_basico_ident(LAParser.Tipo_basico_identContext ctx) {
         if(ctx.tipo_basico() != null)
-            visitTipo_basico(ctx.tipo_basico());
+            return null;
+            //visitTipo_basico(ctx.tipo_basico());
         else if(ctx.IDENT() != null){
             TabelaDeSimbolos ts = pilha.topo();
             if(!ts.existeSimbolo(ctx.getText())){
@@ -332,7 +333,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         
         return null;
     }
-    /*
+    
     @Override
     public Void visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
         if(ctx.identificador() != null){
@@ -340,50 +341,71 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             if(!escopoAtual.existeSimbolo(ctx.identificador().getText())){
                 sp.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.identificador().getText() + " nao declarado");
             }
-            //Verificar tipo
+            //Verificar tipo 
             else{
                 String idTipo = escopoAtual.getTipo(ctx.identificador().getText());   //Tipo do identificador
-                List<String> expTipo = null;
-                
+                String expTipo = null;
+
                 // Definir tipo da expressão
                 if(ctx.expressao() != null){
-                    //Descer camadas até chegar no identificador
+                    // Descer Parser tree até chegar em um identificador ou regra com tipo
                     for(LAParser.Termo_logicoContext tl:ctx.expressao().termo_logico()){
                         for(LAParser.Fator_logicoContext fl:tl.fator_logico()){
-                            for(LAParser.Exp_aritmeticaContext expA:fl.parcela_logica().exp_relacional().exp_aritmetica()){
-                                for(LAParser.TermoContext t:expA.termo()){
-                                    for(LAParser.FatorContext f:t.fator()){
-                                        for(LAParser.ParcelaContext p:f.parcela()){
-                                            if(p.parcela_unario() != null){
-                                                if(p.parcela_unario().identificador() != null)
-                                                    if(escopoAtual.existeSimbolo(p.getText())){
-                                                        expTipo.add(escopoAtual.getTipo(p.parcela_unario().identificador().getText()));
+                            
+                            
+                            //Expressão aritmetica
+                            if(fl.parcela_logica().exp_relacional().exp_aritmetica() != null ){
+                                for(LAParser.Exp_aritmeticaContext expA:fl.parcela_logica().exp_relacional().exp_aritmetica()){
+                                    for(LAParser.TermoContext t:expA.termo()){
+                                        for(LAParser.FatorContext f:t.fator()){
+                                            for(LAParser.ParcelaContext p:f.parcela()){
+                                                if(p.parcela_unario() != null){
+                                                    if(p.parcela_unario().identificador() != null){
+                                                        if(escopoAtual.existeSimbolo(p.getText())){
+                                                            expTipo = escopoAtual.getTipo(p.parcela_unario().identificador().getText());
+                                                            //if(idTipo.equals("logico"))
+                                                            //if(!idTipo.equals(expTipo))
+                                                                //sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.identificador().getText());
+                                                        }
+
                                                     }
+                                                    if(p.parcela_unario().Num_Int() != null && !idTipo.equals("inteiro") && !idTipo.equals("real"))
+                                                        sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.identificador().getText());
+                                                    if(p.parcela_unario().Num_Real() != null && !idTipo.equals("real") )
+                                                        sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.identificador().getText());
+
+                                                }
+                                                else if(p.parcela_nao_unario().Cadeia() != null && !idTipo.equals("literal")){
+                                                    if(ctx.getText().contains("^"))
+                                                        sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para ^" + ctx.identificador().getText());                                            
+                                                    else
+                                                        sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.identificador().getText());
+                                                }
                                             }
-                                            
                                         }
                                     }
                                 }
+                            } // Expressão aritmetica
+                            // Parcela logica - nao funfou
+                            else{
+                                expTipo = "logico";
+                                //sp.println("WTF?");
+                                if(!idTipo.equals(expTipo)){
+                                    sp.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.identificador().getText());
+                                }
                             }
-                                    
-                            
                         }
-                        // Verificacao se os tipo sao iguais
                         
-                        
-                    } // For inicial da descida de camadas
-                    sp.println(expTipo.get(0));
+                    } // For inicial da parser
+                   
                 }// End if - determinar tipo da expressao
-                
-                if(!idTipo.equals(expTipo))
-                    sp.println("Linha " + ctx.getStart().getLine() + ": Atribuição nao compativel para " + ctx.identificador().getText());
-                
+            
             } //End else - Verifica tipo da expressao
         }
         
         return null;
     }
-    */
+    
     
     //--------------------------------------------------------------------------------------------------------------------------------------------
     @Override

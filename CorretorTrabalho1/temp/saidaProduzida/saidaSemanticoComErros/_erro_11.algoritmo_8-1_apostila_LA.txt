@@ -1,6 +1,7 @@
 Linha 6: identificador x ja declarado anteriormente
 Linha 6: identificador y ja declarado anteriormente
 Linha 6: identificador z ja declarado anteriormente
+Linha 9: identificador ponto1.x nao declarado
 Linha 12: identificador ponto1.x nao declarado
 Linha 12: identificador ponto1.y nao declarado
 Linha 12: identificador ponto1.z nao declarado

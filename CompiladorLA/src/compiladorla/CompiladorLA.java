@@ -21,7 +21,7 @@ public class CompiladorLA {
 
      public static void main(String args[]) throws IOException, RecognitionException {
         
-// Arquivos de Entrada e Saida passados como parametros
+        // Arquivos de Entrada e Saida passados como parametros
         File fin = new File(args[0]);
         File fout = new File(args[1]); 
         PrintWriter pw = new PrintWriter(new FileWriter(fout));

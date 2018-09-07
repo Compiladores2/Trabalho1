@@ -1,1 +1,20 @@
-Sem erros
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 19: atribuicao nao compativel para existeTriangulo
+Linha 23: atribuicao nao compativel para ehEquilatero
+Linha 23: atribuicao nao compativel para ehEquilatero
+Linha 23: atribuicao nao compativel para ehEquilatero
+Linha 23: atribuicao nao compativel para ehEquilatero
+Linha 23: atribuicao nao compativel para ehEquilatero
+Linha 25: atribuicao nao compativel para ehIsosceles
+Linha 25: atribuicao nao compativel para ehIsosceles
+Linha 28: atribuicao nao compativel para ehEscaleno
+Linha 28: atribuicao nao compativel para ehEscaleno
+Linha 28: atribuicao nao compativel para ehEscaleno
+Fim da compilacao
