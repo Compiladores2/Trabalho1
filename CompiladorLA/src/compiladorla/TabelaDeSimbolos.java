@@ -49,6 +49,8 @@ public class TabelaDeSimbolos {
         return "";
     }
     
+    public String getEscopo(){return this.escopo;}
+    
     @Override
     public String toString() {
         String ret = "Escopo: "+escopo;

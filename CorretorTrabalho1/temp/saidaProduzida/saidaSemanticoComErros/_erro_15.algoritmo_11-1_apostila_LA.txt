@@ -1,7 +1,4 @@
 Linha 74: identificador vinho[i] nao declarado
-Linha 75: atribuicao nao compativel para somaVendas
-Linha 80: atribuicao nao compativel para mediaVinhos
-Linha 80: atribuicao nao compativel para mediaVinhos
 Linha 86: identificador vinho[i] nao declarado
 Linha 94: identificador vinho[i] nao declarado
 Fim da compilacao
