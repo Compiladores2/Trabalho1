@@ -12,13 +12,13 @@ import java.util.List;
 */
 class AnalisadorSemantico extends LABaseVisitor<Void>{
     
-    // Arquivo para mostrar erro
+    // Arquivo de saida - mostrar erros
     public SaidaParser sp;
     public AnalisadorSemantico(SaidaParser sp) {
         this.sp = sp;
     }
 
-    // Tabelas diferentes para escopos diferentes
+    // Pilha de Tabelas - Tabelas diferentes para escopos diferentes
     private final PilhaDeTabelas pilha = new PilhaDeTabelas();
     
     @Override
