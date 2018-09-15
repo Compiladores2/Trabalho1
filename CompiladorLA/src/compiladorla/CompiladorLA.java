@@ -437,15 +437,6 @@ public class CompiladorLA {
 }// Fim class
 
 
-/*
-algoritmo
-  declare 
-     reg: registro
-            nome: literal
-            idade: inteiro
-          fim_registro
-  reg.nome <- "Maria"
-  reg.idade <- 24
-  escreva(reg.nome," tem ",reg.idade," anos")
-fim_algoritmo
+/* erro no 15,17,20
+fazer o 18 e 19
 */
