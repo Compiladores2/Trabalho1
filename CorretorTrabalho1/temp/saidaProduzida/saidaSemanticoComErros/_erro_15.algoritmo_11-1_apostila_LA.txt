@@ -1,4 +1,4 @@
-Linha 74: identificador vinho[i] nao declarado
-Linha 86: identificador vinho[i] nao declarado
-Linha 94: identificador vinho[i] nao declarado
+leiaVinho(vinho[i])
+escrevaVinho(vinho[i])
+escrevaVinho(vinho[i])
 Fim da compilacao

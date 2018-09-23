@@ -41,7 +41,7 @@ public class CompiladorLA {
         try {
             ProgramaContext arvore = parser.programa();   
             
-            // Nao houve erros sintaticos - Analise Semantica
+            // Nao houve erros lexicos/sintaticos - Realiza Analise Semantica
             if(!out.isModificado()){
                 AnalisadorSemantico as = new AnalisadorSemantico(out);
                 as.visitPrograma(arvore);
@@ -49,14 +49,13 @@ public class CompiladorLA {
             
            
         } catch(ParseCancellationException pce) {
+            // identificação de erros lexicos
             out.println(pce.getMessage());
         }
 
          // Não houve erros ao compilar o programa - Gerador de Codigo
         if (!out.isModificado()) {
-            
             compilador(pw, lex);
-
         } 
 
         else {
@@ -67,7 +66,6 @@ public class CompiladorLA {
         }
         pw.close();
         
-
     }// end main
      
     public static void compilador(PrintWriter pw, LALexer lex){   
@@ -110,7 +108,6 @@ public class CompiladorLA {
                             while(!var.isEmpty()){
                                 tabela.adicionarSimbolo(var.get(i), "literal");
                                 pw.print(","+var.remove(i)+"[80]");
-                                    //i++;
                             }
                             pw.println(";");
                             break;
@@ -194,6 +191,7 @@ public class CompiladorLA {
                             //pw.print("\"");
                             //expressao.add("\"");
                         }
+                        
                     } 
                     // Se for um identificador
                     else if(t.getType() == 60){
@@ -243,8 +241,8 @@ public class CompiladorLA {
                     t=lex.nextToken();
                 }
             }// Fim escreva
-                
-                
+               
+            // Identificador
             else if(t.getType() == 60){
                 Token op = lex.nextToken();
                 //Atribuicao
@@ -428,6 +426,22 @@ public class CompiladorLA {
                 t = lex.nextToken();
             }
             
+            else if(t.getText().equals("procedimento")){
+                Token nome = lex.nextToken();
+                pw.print("void " + nome.getText());
+                
+                // Parametros
+                while(!(t=lex.nextToken()).getText().equals(")")){
+                    pw.print(t.getText());
+                }
+                pw.println(")");
+                t = lex.nextToken();
+            }
+            
+            else if(t.getText().equals("fim_procedimento")){
+                pw.println("\t}");
+                t = lex.nextToken();
+            }
             else
                 t=lex.nextToken();
             
@@ -436,7 +450,3 @@ public class CompiladorLA {
     
 }// Fim class
 
-
-/* erro no 15,17,20
-fazer o 18 e 19
-*/

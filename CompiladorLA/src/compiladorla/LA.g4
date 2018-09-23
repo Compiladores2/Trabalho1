@@ -25,7 +25,7 @@ declaracao_local	:	'declare' variavel
  				
 variavel		:	identificador (',' identificador)* ':' tipo ;
 identificador		:	IDENT ('.' IDENT)* dimensao ;
-dimensao		:	('[' exp_aritmetica ']')* ;	
+dimensao		:	('[' exp_aritmetica ']')* ;
 tipo 			:	registro | tipo_estendido ;
 tipo_basico		:	'literal' | 'inteiro' | 'real' | 'logico' ;
 tipo_basico_ident	:	tipo_basico | IDENT ;

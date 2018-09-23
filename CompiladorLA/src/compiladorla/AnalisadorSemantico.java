@@ -2,7 +2,7 @@ package compiladorla;
 
 import java.util.List;
 
-/* Rodando: 1,2,3,4,5,6,9,18
+/* Erros Semânticos
     1 - identificador ja declarado anteriormente
     2 - tipo nao declarado v
     3 - identificador nao declarado
@@ -10,6 +10,7 @@ import java.util.List;
     5 - atribuicao n compativel com o tipo declarado
     6 - uso de return em escopo nao permitido
 */
+
 class AnalisadorSemantico extends LABaseVisitor<Void>{
     
     // Arquivo de saida - mostrar erros
@@ -42,7 +43,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
     }
     
     @Override
-    public Void visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
+    public Void visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { 
         if(ctx.declaracao_local() != null){
             visitDeclaracao_local(ctx.declaracao_local());
         } else if(ctx.declaracao_global() != null){
@@ -99,21 +100,44 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
             else{ // Variavel nao declarada
                 // Verificar se o tipo é valido antes de inserir na tabela
                 if(ctx.tipo() != null){
-                    visitTipo(ctx.tipo());
-                }
-                
-                escopoAtual.adicionarSimbolo(id.getText(), ctx.tipo().getText());
-                
-                // Falta fazer os vetores e ponteirosif(id.dimensao() != null){
-                /*   sp.println((id.dimensao().getText()));
-                    for(int i=id.dimensao().getAltNumber(); i > 0 ; i--){
-                        escopoAtual.adicionarSimbolo(ctx.getText()+"["+i+"]", ctx.tipo().getText() );
+                    if(ctx.tipo().registro() != null){
+                        //sp.println(ctx.tipo().registro().getText());
+                        escopoAtual.adicionarSimbolo(id.getText(), ctx.tipo().getText());
+                        visitRegistro(ctx.tipo().registro(), id.getText());
                         
                     }
-                }   
-                else{
-                    escopoAtual.adicionarSimbolo(ctx.getText(), ctx.tipo().getText());
-                }*/
+                    else{
+                        //sp.println(ctx.tipo().getText());
+                        visitTipo(ctx.tipo());
+                        escopoAtual.adicionarSimbolo(id.getText(), ctx.tipo().getText());
+                    }
+                }
+            }  
+            
+        }
+        
+        return null;
+    }
+    
+    public Void visitVariavelRegistro(LAParser.VariavelContext ctx, String registro) { 
+        
+       for(LAParser.IdentificadorContext id:ctx.identificador()){
+                    
+            String nomeVarReg = registro + "." + id.getText(); 
+            TabelaDeSimbolos escopoAtual = pilha.topo();
+            if(escopoAtual.existeSimbolo(nomeVarReg)){
+                sp.println("Linha " + id.getStart().getLine() + ": identificador " + nomeVarReg + " ja declarado anteriormente");
+            }
+
+            else{ // Variavel nao declarada
+                // Verificar se o tipo é valido antes de inserir na tabela
+                if(ctx.tipo() != null){
+                        //sp.println(ctx.tipo().getText());
+                        visitTipo_estendido(ctx.tipo().tipo_estendido());
+                        escopoAtual.adicionarSimbolo(nomeVarReg, ctx.tipo().getText());
+
+                }
+                
             }  
             
         }
@@ -124,25 +148,29 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
     
     @Override
     public Void visitTipo(LAParser.TipoContext ctx) {
-        if(ctx.registro() != null)
+        if(ctx.registro() != null){
+            //sp.println(ctx.getText());
             visitRegistro(ctx.registro());
-        else if (ctx.tipo_estendido() != null)
+        }
+        else if (ctx.tipo_estendido() != null){
             visitTipo_estendido(ctx.tipo_estendido());
+        }
         
         return null;
     }
 
-    @Override
-    public Void visitRegistro(LAParser.RegistroContext ctx) {
+    //@Override
+    public Void visitRegistro(LAParser.RegistroContext ctx, String id) {
         for(LAParser.VariavelContext var: ctx.variavel()){
-            visitVariavel(var);
+            //sp.println(ctx.getText());
+            visitVariavelRegistro(var, id);
         }
         return null;
     }
     
     @Override
     public Void visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
-        
+        //sp.println(ctx.getText());
         if(ctx.tipo_basico_ident() != null)
             visitTipo_basico_ident(ctx.tipo_basico_ident());
         
@@ -421,10 +449,7 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
     }
         
     
-    @Override
-    public Void visitCmdEnquanto(LAParser.CmdEnquantoContext ctx) {
-        return super.visitCmdEnquanto(ctx);
-    }
+  
     
     //--------------------------------------------------------------------------------------------------------------------------------------------
     @Override
@@ -447,10 +472,10 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitOp_relacional(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
-    
-
-    
+      @Override
+    public Void visitCmdEnquanto(LAParser.CmdEnquantoContext ctx) {
+        return super.visitCmdEnquanto(ctx);
+    }
 
     @Override
     public Void visitOp3(LAParser.Op3Context ctx) {
@@ -501,7 +526,10 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
 
     @Override
     public Void visitCmdChamada(LAParser.CmdChamadaContext ctx) {
-        return super.visitCmdChamada(ctx); //To change body of generated methods, choose Tools | Templates.
+        
+        sp.println(ctx.getText());
+        
+        return null; //To change body of generated methods, choose Tools | Templates.
     }
 
 
@@ -510,7 +538,6 @@ class AnalisadorSemantico extends LABaseVisitor<Void>{
         return super.visitCmdFaca(ctx); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
 
     @Override
     public Void visitCmdPara(LAParser.CmdParaContext ctx) {
