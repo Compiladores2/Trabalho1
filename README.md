@@ -10,6 +10,7 @@
 ## Requisitos de Software
   - ANTLR (ANother Tool for Language Recognition) - versão 4.7.1
   - NetBeans 8.2
+  - Compilador GCC
 
 #### Como gerar a gramática usando o antlr 4.7.1?
 A gramática LA.g4 está na pasta: /CompiladorLA/src/compiladorla.
